@@ -1,0 +1,3 @@
+# Core engine, algorithms, CLI, Tkinter GUI, and SVG/PDF chart generator use Python stdlib + optional PyMuPDF
+# Install PyMuPDF only if you want automatic SVG -> PDF/PNG conversion for LaTeX:
+pymupdf>=1.24.0

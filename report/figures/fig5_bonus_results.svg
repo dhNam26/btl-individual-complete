@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="365" viewBox="0 0 760 365">
+<style>
+  text { font-family: "Times New Roman", Georgia, serif; fill: #1e293b; }
+  .title { font-size: 13.5px; font-weight: bold; }
+  .axis-label { font-size: 11.5px; font-weight: bold; }
+  .tick { font-size: 10px; fill: #334155; }
+  .legend { font-size: 10px; }
+  .val { font-size: 9.5px; font-weight: bold; }
+</style>
+<rect width="760" height="365" fill="#ffffff"/>
+<text x="380.0" y="22" text-anchor="middle" class="title">Bonus Extensions: (a) Xiangqi AI Strength &amp; (b) Last-Mile Delivery Routing Cost</text>
+<text x="248.0" y="42" text-anchor="middle" class="axis-label">(a) Xiangqi Win / Draw Rate (%)</text>
+<line x1="158.0" y1="52" x2="158.0" y2="284" stroke="#e2e8f0"/>
+<text x="158.0" y="300" text-anchor="middle" class="tick">0%</text>
+<line x1="248.0" y1="52" x2="248.0" y2="284" stroke="#e2e8f0"/>
+<text x="248.0" y="300" text-anchor="middle" class="tick">50%</text>
+<line x1="338.0" y1="52" x2="338.0" y2="284" stroke="#e2e8f0"/>
+<text x="338.0" y="300" text-anchor="middle" class="tick">100%</text>
+<line x1="158" y1="52" x2="158" y2="284" stroke="#1e293b" stroke-width="1.2"/>
+<line x1="158" y1="284" x2="338" y2="284" stroke="#1e293b" stroke-width="1.2"/>
+<rect x="158" y="60.7" width="158.4" height="21.3" fill="#1f4e79"/>
+<rect x="316.4" y="60.7" width="21.6" height="21.3" fill="#93c5fd"/>
+<text x="152" y="74.8" text-anchor="end" class="tick">AB(d=2) vs Rand</text>
+<text x="343.0" y="74.8" class="val">88%W</text>
+<rect x="158" y="99.4" width="118.8" height="21.3" fill="#1f4e79"/>
+<rect x="276.8" y="99.4" width="61.2" height="21.3" fill="#93c5fd"/>
+<text x="152" y="113.5" text-anchor="end" class="tick">MCTS-Rand vs Rand</text>
+<text x="343.0" y="113.5" class="val">66%W</text>
+<rect x="158" y="138.0" width="158.4" height="21.3" fill="#1f4e79"/>
+<rect x="316.4" y="138.0" width="21.6" height="21.3" fill="#93c5fd"/>
+<text x="152" y="152.2" text-anchor="end" class="tick">MCTS-Heur vs Rand</text>
+<text x="343.0" y="152.2" class="val">88%W</text>
+<rect x="158" y="176.7" width="172.8" height="21.3" fill="#1f4e79"/>
+<rect x="330.8" y="176.7" width="0.0" height="21.3" fill="#93c5fd"/>
+<text x="152" y="190.8" text-anchor="end" class="tick">MCTS-Val vs Rand</text>
+<text x="335.8" y="190.8" class="val">96%W</text>
+<rect x="158" y="215.4" width="162.0" height="21.3" fill="#1f4e79"/>
+<rect x="320.0" y="215.4" width="18.0" height="21.3" fill="#93c5fd"/>
+<text x="152" y="229.5" text-anchor="end" class="tick">PUCT-Val vs Greedy</text>
+<text x="343.0" y="229.5" class="val">90%W</text>
+<rect x="158" y="254.0" width="90.0" height="21.3" fill="#1f4e79"/>
+<rect x="248.0" y="254.0" width="90.0" height="21.3" fill="#93c5fd"/>
+<text x="152" y="268.2" text-anchor="end" class="tick">AB(d=2) vs Greedy</text>
+<text x="343.0" y="268.2" class="val">50%W</text>
+<rect x="173" y="314" width="10" height="10" fill="#1f4e79"/>
+<text x="187" y="323" class="tick">Win</text>
+<rect x="238" y="314" width="10" height="10" fill="#93c5fd"/>
+<text x="252" y="323" class="tick">Draw</text>
+<text x="604.5" y="42" text-anchor="middle" class="axis-label">(b) Delivery Total Cost (Lower = Better)</text>
+<line x1="472" y1="284.0" x2="737" y2="284.0" stroke="#e2e8f0"/>
+<text x="466" y="287.5" text-anchor="end" class="tick">0</text>
+<line x1="472" y1="226.0" x2="737" y2="226.0" stroke="#e2e8f0"/>
+<text x="466" y="229.5" text-anchor="end" class="tick">1000</text>
+<line x1="472" y1="168.0" x2="737" y2="168.0" stroke="#e2e8f0"/>
+<text x="466" y="171.5" text-anchor="end" class="tick">2000</text>
+<line x1="472" y1="110.0" x2="737" y2="110.0" stroke="#e2e8f0"/>
+<text x="466" y="113.5" text-anchor="end" class="tick">3000</text>
+<line x1="472" y1="52.0" x2="737" y2="52.0" stroke="#e2e8f0"/>
+<text x="466" y="55.5" text-anchor="end" class="tick">4000</text>
+<rect x="472" y="52" width="265" height="232" fill="none" stroke="#1e293b" stroke-width="1.2"/>
+<text x="426" y="168.0" text-anchor="middle" class="axis-label" transform="rotate(-90 426 168.0)">Total Cost</text>
+<text x="516.2" y="300" text-anchor="middle" class="tick">M=8</text>
+<rect x="484.4" y="256.2" width="14.4" height="27.8" fill="#b2182b" rx="1"/>
+<rect x="500.3" y="244.6" width="14.4" height="39.4" fill="#d95f02" rx="1"/>
+<rect x="516.2" y="269.1" width="14.4" height="14.9" fill="#7570b3" rx="1"/>
+<rect x="532.1" y="269.6" width="14.4" height="14.4" fill="#1b9e77" rx="1"/>
+<text x="604.5" y="300" text-anchor="middle" class="tick">M=12</text>
+<rect x="572.7" y="208.1" width="14.4" height="75.9" fill="#b2182b" rx="1"/>
+<rect x="588.6" y="176.4" width="14.4" height="107.6" fill="#d95f02" rx="1"/>
+<rect x="604.5" y="229.3" width="14.4" height="54.7" fill="#7570b3" rx="1"/>
+<rect x="620.4" y="240.9" width="14.4" height="43.1" fill="#1b9e77" rx="1"/>
+<text x="692.8" y="300" text-anchor="middle" class="tick">M=16</text>
+<rect x="661.0" y="136.2" width="14.4" height="147.8" fill="#b2182b" rx="1"/>
+<rect x="676.9" y="75.7" width="14.4" height="208.3" fill="#d95f02" rx="1"/>
+<rect x="692.8" y="157.9" width="14.4" height="126.1" fill="#7570b3" rx="1"/>
+<rect x="708.7" y="200.7" width="14.4" height="83.3" fill="#1b9e77" rx="1"/>
+<rect x="472" y="310" width="10" height="10" fill="#b2182b"/>
+<text x="487" y="318.5" class="tick">Nearest Neighbor</text>
+<rect x="617" y="310" width="10" height="10" fill="#d95f02"/>
+<text x="632" y="318.5" class="tick">EDF Heuristic</text>
+<rect x="472" y="328" width="10" height="10" fill="#7570b3"/>
+<text x="487" y="336.5" class="tick">MCTS-Random</text>
+<rect x="617" y="328" width="10" height="10" fill="#1b9e77"/>
+<text x="632" y="336.5" class="tick">MCTS-Heuristic</text>
+</svg>

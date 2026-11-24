@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="380" viewBox="0 0 640 380">
+<style>
+  text { font-family: "Times New Roman", Georgia, serif; fill: #1e293b; }
+  .title { font-size: 13.5px; font-weight: bold; }
+  .axis-label { font-size: 11.5px; font-weight: bold; }
+  .tick { font-size: 10px; fill: #334155; }
+  .legend { font-size: 10px; }
+  .val { font-size: 9.5px; font-weight: bold; }
+</style>
+<rect width="640" height="380" fill="#ffffff"/>
+<text x="320.0" y="22" text-anchor="middle" class="title">Effect of Exploration Constant c and MCTS Iterations on Win Rate (Gomoku 5-in-a-Row)</text>
+<line x1="64" y1="326.0" x2="612" y2="326.0" stroke="#e2e8f0" stroke-width="1"/>
+<text x="56" y="330.0" text-anchor="end" class="tick">0%</text>
+<line x1="64" y1="268.8" x2="612" y2="268.8" stroke="#e2e8f0" stroke-width="1"/>
+<text x="56" y="272.8" text-anchor="end" class="tick">20%</text>
+<line x1="64" y1="211.6" x2="612" y2="211.6" stroke="#e2e8f0" stroke-width="1"/>
+<text x="56" y="215.6" text-anchor="end" class="tick">40%</text>
+<line x1="64" y1="154.4" x2="612" y2="154.4" stroke="#e2e8f0" stroke-width="1"/>
+<text x="56" y="158.4" text-anchor="end" class="tick">60%</text>
+<line x1="64" y1="97.2" x2="612" y2="97.2" stroke="#e2e8f0" stroke-width="1"/>
+<text x="56" y="101.2" text-anchor="end" class="tick">80%</text>
+<line x1="64" y1="40.0" x2="612" y2="40.0" stroke="#e2e8f0" stroke-width="1"/>
+<text x="56" y="44.0" text-anchor="end" class="tick">100%</text>
+<line x1="64.0" y1="40" x2="64.0" y2="326" stroke="#e2e8f0" stroke-dasharray="3,3" stroke-width="1"/>
+<text x="64.0" y="343" text-anchor="middle" class="tick">100</text>
+<line x1="192.4" y1="40" x2="192.4" y2="326" stroke="#e2e8f0" stroke-dasharray="3,3" stroke-width="1"/>
+<text x="192.4" y="343" text-anchor="middle" class="tick">250</text>
+<line x1="289.5" y1="40" x2="289.5" y2="326" stroke="#e2e8f0" stroke-dasharray="3,3" stroke-width="1"/>
+<text x="289.5" y="343" text-anchor="middle" class="tick">500</text>
+<line x1="386.5" y1="40" x2="386.5" y2="326" stroke="#e2e8f0" stroke-dasharray="3,3" stroke-width="1"/>
+<text x="386.5" y="343" text-anchor="middle" class="tick">1000</text>
+<line x1="483.6" y1="40" x2="483.6" y2="326" stroke="#e2e8f0" stroke-dasharray="3,3" stroke-width="1"/>
+<text x="483.6" y="343" text-anchor="middle" class="tick">2000</text>
+<line x1="612.0" y1="40" x2="612.0" y2="326" stroke="#e2e8f0" stroke-dasharray="3,3" stroke-width="1"/>
+<text x="612.0" y="343" text-anchor="middle" class="tick">5000</text>
+<rect x="64" y="40" width="548" height="286" fill="none" stroke="#1e293b" stroke-width="1.3"/>
+<text x="338.0" y="368" text-anchor="middle" class="axis-label">MCTS Iterations (log scale)</text>
+<text x="18" y="183.0" text-anchor="middle" class="axis-label" transform="rotate(-90 18 183.0)">Win Rate (%)</text>
+<path d="M64.0,286.0 L192.4,211.6 L289.5,171.6 L386.5,114.4 L483.6,91.5 L612.0,57.2" fill="none" stroke="#d95f02" stroke-width="2.0" stroke-dasharray="6,3"/>
+<circle cx="64.0" cy="286.0" r="4.2" fill="#d95f02" stroke="#fff" stroke-width="1"/>
+<circle cx="192.4" cy="211.6" r="4.2" fill="#d95f02" stroke="#fff" stroke-width="1"/>
+<circle cx="289.5" cy="171.6" r="4.2" fill="#d95f02" stroke="#fff" stroke-width="1"/>
+<circle cx="386.5" cy="114.4" r="4.2" fill="#d95f02" stroke="#fff" stroke-width="1"/>
+<circle cx="483.6" cy="91.5" r="4.2" fill="#d95f02" stroke="#fff" stroke-width="1"/>
+<circle cx="612.0" cy="57.2" r="4.2" fill="#d95f02" stroke="#fff" stroke-width="1"/>
+<path d="M64.0,314.6 L192.4,263.1 L289.5,200.2 L386.5,148.7 L483.6,91.5 L612.0,80.0" fill="none" stroke="#008080" stroke-width="2.0"/>
+<rect x="60.4" y="311.0" width="7.2" height="7.2" fill="#008080" stroke="#fff" stroke-width="1"/>
+<rect x="188.8" y="259.5" width="7.2" height="7.2" fill="#008080" stroke="#fff" stroke-width="1"/>
+<rect x="285.9" y="196.6" width="7.2" height="7.2" fill="#008080" stroke="#fff" stroke-width="1"/>
+<rect x="382.9" y="145.1" width="7.2" height="7.2" fill="#008080" stroke="#fff" stroke-width="1"/>
+<rect x="480.0" y="87.9" width="7.2" height="7.2" fill="#008080" stroke="#fff" stroke-width="1"/>
+<rect x="608.4" y="76.4" width="7.2" height="7.2" fill="#008080" stroke="#fff" stroke-width="1"/>
+<path d="M64.0,320.3 L192.4,257.4 L289.5,217.3 L386.5,160.1 L483.6,91.5 L612.0,68.6" fill="none" stroke="#1f4e79" stroke-width="2.6"/>
+<polygon points="64.0,315.3 69.0,320.3 64.0,325.3 59.0,320.3" fill="#1f4e79" stroke="#fff" stroke-width="1"/>
+<polygon points="192.4,252.4 197.4,257.4 192.4,262.4 187.4,257.4" fill="#1f4e79" stroke="#fff" stroke-width="1"/>
+<polygon points="289.5,212.3 294.5,217.3 289.5,222.3 284.5,217.3" fill="#1f4e79" stroke="#fff" stroke-width="1"/>
+<polygon points="386.5,155.1 391.5,160.1 386.5,165.1 381.5,160.1" fill="#1f4e79" stroke="#fff" stroke-width="1"/>
+<polygon points="483.6,86.5 488.6,91.5 483.6,96.5 478.6,91.5" fill="#1f4e79" stroke="#fff" stroke-width="1"/>
+<polygon points="612.0,63.6 617.0,68.6 612.0,73.6 607.0,68.6" fill="#1f4e79" stroke="#fff" stroke-width="1"/>
+<path d="M64.0,320.3 L192.4,297.4 L289.5,245.9 L386.5,200.2 L483.6,108.6 L612.0,102.9" fill="none" stroke="#b2182b" stroke-width="2.0" stroke-dasharray="2,2"/>
+<polygon points="64.0,315.3 68.5,324.3 59.5,324.3" fill="#b2182b" stroke="#fff" stroke-width="1"/>
+<polygon points="192.4,292.4 196.9,301.4 187.9,301.4" fill="#b2182b" stroke="#fff" stroke-width="1"/>
+<polygon points="289.5,240.9 294.0,249.9 285.0,249.9" fill="#b2182b" stroke="#fff" stroke-width="1"/>
+<polygon points="386.5,195.2 391.0,204.2 382.0,204.2" fill="#b2182b" stroke="#fff" stroke-width="1"/>
+<polygon points="483.6,103.6 488.1,112.6 479.1,112.6" fill="#b2182b" stroke="#fff" stroke-width="1"/>
+<polygon points="612.0,97.9 616.5,106.9 607.5,106.9" fill="#b2182b" stroke="#fff" stroke-width="1"/>
+<rect x="434" y="232" width="168" height="84" fill="#ffffff" fill-opacity="0.95" stroke="#94a3b8" stroke-width="1" rx="3"/>
+<line x1="444" y1="249" x2="468" y2="249" stroke="#d95f02" stroke-width="2.4" stroke-dasharray="6,3"/>
+<text x="476" y="252.5" class="legend">c = 0.5</text>
+<line x1="444" y1="267" x2="468" y2="267" stroke="#008080" stroke-width="2.4"/>
+<text x="476" y="270.5" class="legend">c = 1.0</text>
+<line x1="444" y1="285" x2="468" y2="285" stroke="#1f4e79" stroke-width="2.4"/>
+<text x="476" y="288.5" class="legend">c = 1.4 (theory)</text>
+<line x1="444" y1="303" x2="468" y2="303" stroke="#b2182b" stroke-width="2.4" stroke-dasharray="2,2"/>
+<text x="476" y="306.5" class="legend">c = 2.0</text>
+</svg>
