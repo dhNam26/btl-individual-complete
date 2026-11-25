@@ -1,0 +1,212 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\usepackage{booktabs}
+\usepackage{hyperref}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!60!black,
+    citecolor=blue!60!black,
+    urlcolor=blue!60!black
+}
+
+\newtheorem{definition}{Definition}
+\newtheorem{proposition}{Proposition}
+
+\begin{document}
+
+\title{Bonus Appendix: Mathematical Modeling and Adversarial Search\\
+for Xiangqi (Chinese Chess) via Alpha--Beta Pruning and MCTS--UCT}
+
+\author{
+\IEEEauthorblockN{Student Author}
+\IEEEauthorblockA{Artificial Intelligence Midterm Project --- Bonus Extension (2026--2027)}
+}
+
+\maketitle
+
+\begin{abstract}
+This standalone bonus report extends our adversarial search study from Tic-Tac-Toe and Gomoku to Xiangqi (Chinese Chess). Emphasizing formal domain knowledge and mathematical foundations, we model Xiangqi's asymmetric board topology, piece-blocking constraints, Flying General rule, and checkmate/stalemate-as-loss semantics. We then apply two search paradigms sequentially: (1) Minimax with Alpha--Beta pruning backed by Material + Piece-Square Table (PST) evaluation and MVV--LVA move ordering, and (2) Monte Carlo Tree Search (MCTS) with UCT, logistic value-cutoff simulation, and heuristic-prior PUCT. Verified benchmarks confirm a 93.44\% node reduction on the 44-move opening via ordered Alpha--Beta, while Value-Cutoff MCTS lifts win rate against Random from 66.0\% to 96.0\% at an 8.4$\times$ speedup, and PUCT + Value-Cutoff defeats a 1-ply Greedy opponent 90.0\%W / 10.0\%D / 0.0\%L.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Xiangqi, Chinese Chess, Formal Game Modeling, Alpha--Beta Pruning, MVV--LVA, MCTS, UCT, PUCT, Value-Cutoff Simulation.
+\end{IEEEkeywords}
+
+% ============================================================================
+\section{Brief Introduction}
+% ============================================================================
+While 3$\times$3 Tic-Tac-Toe is solvable exactly and 5-in-a-row Gomoku features homogeneous stones, \textbf{Xiangqi (Chinese Chess)} introduces heterogeneous pieces, directional constraints, and non-local blocking rules on a $10 \times 9$ grid. With an estimated state-space complexity of $\sim 10^{40}$, game-tree complexity of $\sim 10^{150}$, and average branching factor $b \approx 38$ (44 legal moves at the opening), Xiangqi is an ideal bonus benchmark for testing how domain knowledge interacts with exact tree pruning (Minimax + Alpha--Beta) and simulation-based planning (MCTS + UCT/PUCT).
+
+% ============================================================================
+\section{Formal Domain Knowledge \& Mathematical Model}
+% ============================================================================
+\subsection{Board Topology and State Space}
+Let the board intersections be $\Omega = \{0,1,\dots,9\} \times \{0,1,\dots,8\}$ ($|\Omega|=90$). A Xiangqi state is $s = (B, p)$, where $p \in \{+1, -1\}$ denotes the active side (Red $+1$ moves first; Black $-1$ moves second), and $B: \Omega \to \{-7,\dots,0,\dots,+7\}$ maps each intersection to either empty ($0$) or a signed piece type $\tau = |B(x)| \in \{1,\dots,7\}$:
+\[
+1{:}\,\text{General }(K),\; 2{:}\,\text{Advisor }(A),\; 3{:}\,\text{Elephant }(E),\; 4{:}\,\text{Horse }(H),
+\]
+\[
+5{:}\,\text{Chariot }(R),\; 6{:}\,\text{Cannon }(C),\; 7{:}\,\text{Soldier }(P).
+\]
+Domain topology partitions $\Omega$ into two \emph{palaces} and two \emph{river halves}:
+\begin{align}
+\mathcal{P}_{+1} &= \{7,8,9\}\times\{3,4,5\}, & \mathcal{P}_{-1} &= \{0,1,2\}\times\{3,4,5\}, \\
+\mathcal{H}_{+1} &= \{5,\dots,9\}\times\{0..8\}, & \mathcal{H}_{-1} &= \{0,\dots,4\}\times\{0..8\}.
+\end{align}
+
+\subsection{Piece-Specific Kinematic and Blocking Constraints}
+For an orthogonal ray between $u=(r_1,c_1)$ and $v=(r_2,c_2)$ ($r_1=r_2$ or $c_1=c_2$), define the count of strictly intervening occupied intersections:
+\begin{equation}
+m(u, v) = \big|\{ w \in \mathrm{open\_seg}(u, v) : B(w) \neq 0 \}\big|.
+\end{equation}
+A pseudo-legal move $u \to v$ by player $p$ requires $p\cdot B(u) > 0$, $p\cdot B(v) \le 0$ (no self-capture), and satisfies the exact piece constraint for $\tau = |B(u)|$:
+\begin{itemize}
+    \item \textbf{General ($K$):} $v \in \mathcal{P}_p$ and $\|v - u\|_1 = 1$.
+    \item \textbf{Advisor ($A$):} $v \in \mathcal{P}_p$ and $|\Delta r| = |\Delta c| = 1$.
+    \item \textbf{Elephant ($E$):} $v \in \mathcal{H}_p$ (cannot cross river), $|\Delta r|=|\Delta c|=2$, and midpoint \emph{eye} unblocked: $B\!\left(\frac{r_1+r_2}{2}, \frac{c_1+c_2}{2}\right)=0$.
+    \item \textbf{Horse ($H$):} $\{|\Delta r|, |\Delta c|\}=\{1,2\}$ and orthogonal \emph{leg} unblocked: $B(r_1+\ell_r, c_1+\ell_c)=0$, where $(\ell_r,\ell_c)=(\mathrm{sgn}(\Delta r)\mathbf{1}_{|\Delta r|=2},\,\mathrm{sgn}(\Delta c)\mathbf{1}_{|\Delta c|=2})$.
+    \item \textbf{Chariot ($R$):} Orthogonal ($r_1=r_2$ or $c_1=c_2$) with $m(u,v)=0$.
+    \item \textbf{Cannon ($C$):} Orthogonal with $m(u,v)=0$ if $B(v)=0$ (non-capture), and \textbf{$m(u,v)=1$} if $p\cdot B(v)<0$ (must jump exactly one screen piece to capture).
+    \item \textbf{Soldier ($P$):} Before crossing river ($u \in \mathcal{H}_p$): $(\Delta r, \Delta c) = (-p, 0)$ only. After crossing ($u \notin \mathcal{H}_p$): $(\Delta r, \Delta c) \in \{(-p,0),(0,-1),(0,+1)\}$.
+\end{itemize}
+
+\subsection{Check, Flying General Rule, and Terminal Semantics}
+Let $x_K(p) \in \mathcal{P}_p$ denote player $p$'s General. State $s$ has player $p$ \emph{in check}, denoted $\mathrm{Check}(s, p)$, iff either (i) an opponent piece pseudo-legally attacks $x_K(p)$ (with reverse leg check for enemy Horses), or (ii) the \textbf{Flying General} condition is violated:
+\begin{equation}
+\mathrm{FlyingGen}(s) \iff c_{K}(+1) = c_{K}(-1) \;\land\; m\big(x_K(+1),\, x_K(-1)\big) = 0.
+\end{equation}
+The strictly legal action set filters out self-exposing moves:
+\begin{equation}
+\mathcal{A}(s) = \big\{ a \in \mathcal{A}_{\text{pseudo}}(s) : \neg\,\mathrm{Check}\big(T(s,a),\, p\big) \big\}.
+\end{equation}
+Crucially, unlike Western Chess, Xiangqi treats \emph{both} checkmate and stalemate identically as a loss for the side unable to move:
+\begin{equation}
+\mathcal{A}(s) = \emptyset \implies u(s, p) = -1,\quad u(s, -p) = +1.
+\end{equation}
+Draws ($u=0$) occur upon insufficient attacking material ($\forall x,\, |B(x)| \notin \{R,C,H,P\}$) or reaching the ply horizon $t_{\max}$.
+
+% ============================================================================
+\section{Algorithm 1: Minimax with Alpha--Beta Pruning}
+% ============================================================================
+\subsection{Exact Minimax Recurrence and Pruning Bounds}
+For root perspective $r \in \{+1,-1\}$ and depth limit $d$, the minimax value satisfies
+\begin{equation}
+V_d(s) =
+\begin{cases}
+\mathrm{Eval}(s, r), & s \in \mathcal{Z} \text{ or } d = 0, \\
+\max_{a \in \mathcal{A}(s)} V_{d-1}(T(s,a)), & p(s) = r, \\
+\min_{a \in \mathcal{A}(s)} V_{d-1}(T(s,a)), & p(s) \neq r.
+\end{cases}
+\end{equation}
+Alpha--Beta pruning maintains the search window $[\alpha, \beta]$, where $\alpha$ is the highest score already guaranteed for MAX and $\beta$ is the lowest score already guaranteed for MIN along the ancestor path. Pruning whenever $\alpha \ge \beta$ is \emph{provably exact} (returns the identical $V_d(s_0)$) while reducing asymptotic node expansions from $\Theta(b^d)$ to $\Theta(b^{d/2})$ under optimal ordering~\cite{knuth1975}. For Xiangqi ($b \approx 38$), ideal ordering drops a 2-ply search from $38^2 \approx 1{,}444$ leaves toward $O(38)$---a $>10\times$ reduction.
+
+\subsection{Domain-Knowledge Evaluation and MVV--LVA Ordering}
+For non-terminal leaves, we define an additive Material + Positional Piece-Square Table (PST) evaluation function:
+\begin{equation}
+\mathrm{Eval}(s, r) = r \sum_{\substack{x \in \Omega \\ B(x) \neq 0}} \mathrm{sgn}(B(x)) \Big( w_{|B(x)|} + \mathrm{PST}_{|B(x)|}\big(\phi_{\mathrm{sgn}(B(x))}(x)\big) + \delta_{\text{riv}}(x) \Big),
+\label{eq:xq_eval}
+\end{equation}
+where material weights are $w = (10000, 200, 200, 400, 900, 450, 100)$ for $(K,A,E,H,R,C,P)$, the symmetry map is $\phi_{+1}(r,c)=(r,c)$ and $\phi_{-1}(r,c)=(9-r,c)$, and $\delta_{\text{riv}}(x) = 80$ if $x$ holds a Soldier that has crossed the river ($0$ otherwise). Terminal wins receive $\pm(10^5 + 2(t_{\max} - t))$ to favor faster checkmates.
+
+To trigger early $\alpha$--$\beta$ cutoffs, legal moves $a=(u \to v)$ are sorted descending by the \textbf{MVV--LVA} (Most Valuable Victim--Least Valuable Attacker) priority score plus central-file bonus:
+\begin{equation}
+h_{\text{ord}}(u \to v) = 10\,w_{|B(v)|}\mathbf{1}_{B(v)\neq 0} - w_{|B(u)|} + 2\big(4 - |c_v - 4|\big).
+\end{equation}
+
+\subsection{Verified Pruning Results on Xiangqi}
+Table~\ref{tab:xq_ab} reports exact measurements from our verified engine. On the 44-move standard opening ($d=2$), unordered Alpha--Beta visits 1,116 nodes, whereas MVV--LVA ordering cuts this by $8.65\times$ down to \textbf{129 nodes} (**93.44\% reduction** vs. plain Minimax's 1,965 nodes, speedup $16.3\times$) with exact value match ($-66.0$). On the balanced skirmish position ($d=2$), ordered Alpha--Beta reduces nodes by **76.56%** (`768 -> 180`), and at $d=3$ cuts natural Alpha--Beta nodes in half (`2,337 -> 1,159`).
+
+\begin{table}[t]
+\centering
+\caption{Minimax vs. Alpha--Beta Pruning on Xiangqi (9$\times$10)}
+\label{tab:xq_ab}
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+\textbf{Position} & \textbf{d} & \textbf{Minimax} & \textbf{AB Nat.} & \textbf{AB Ord.} & \textbf{Red.\%} & \textbf{ms} \\
+\midrule
+Std. Opening ($b{=}44$) & 2 & 1,965 & 1,116 & \textbf{129} & \textbf{93.44\%} & 20.7 \\
+Skirmish ($b{\approx}28$) & 2 & 768 & 230 & \textbf{180} & \textbf{76.56\%} & 23.6 \\
+Skirmish ($b{\approx}28$) & 3 & --- & 2,337 & \textbf{1,159} & --- & 117.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ============================================================================
+\section{Algorithm 2: MCTS--UCT, Value-Cutoff \& PUCT}
+% ============================================================================
+\subsection{Bandit Foundation and Why Naive MCTS Struggles in Xiangqi}
+MCTS treats node selection as a $K$-armed bandit problem~\cite{auer2002,kocsis2006}. For bounded rewards $r \in [0,1]$, Hoeffding's inequality $\mathbb{P}(\mu_i - \bar{X}_i \ge \varepsilon) \le e^{-2N_i\varepsilon^2}$ with failure probability $\delta = N_p^{-4}$ yields the canonical UCT selection index:
+\begin{equation}
+\mathrm{UCT}(s, a_i) = \frac{W_i}{N_i} + c \sqrt{\frac{\ln N_p}{N_i}}, \quad c_{\text{theory}} = \sqrt{2}.
+\end{equation}
+During backpropagation, every node stores `player_just_moved` so reward $r_{+1} \in [0,1]$ updates $W(v) \leftarrow W(v) + r_{+1}$ for Red nodes and $W(v) \leftarrow W(v) + (1 - r_{+1})$ for Black nodes; final action selection uses the \emph{robust child} $\arg\max_i N_i$.
+
+However, \textbf{pure random rollouts are ill-suited to Xiangqi}: because $b \approx 38$ and checkmate requires coordinated piece attacks, random playouts rarely terminate within 40--60 plies, yielding sparse draw rewards ($0.5$) and extreme variance (and costing 1.73\,s per move at 200 iterations).
+
+\subsection{Domain-Knowledge Mathematical Enhancements}
+To overcome sparse tactical rewards, we inject domain knowledge at two points in MCTS:
+\begin{enumerate}
+    \item \textbf{Capture-Biased Heuristic Rollout:} At each rollout ply, with probability $0.85$ select $\arg\max_{a} w_{|B(v_a)|}$ among captures; otherwise sample uniformly from $\mathcal{A}(s)$.
+    \item \textbf{Value-Cutoff Simulation ($L=4$, Value-Network Precursor):} Run only $L=4$ tactical plies and evaluate the leaf state via a logistic squashing of~\eqref{eq:xq_eval}:
+    \begin{equation}
+    \hat{v}(s) = \sigma\!\left(\frac{\mathrm{Eval}(s, +1)}{\tau}\right) = \frac{1}{1 + \exp\!\left(-\mathrm{Eval}(s, +1)/\tau\right)}, \quad \tau = 600.
+    \end{equation}
+    This converts material/positional advantage directly into an estimated win probability in $(0,1)$, eliminating long noisy playouts.
+    \item \textbf{PUCT with MVV--LVA Rank Prior:} Inspired by AlphaZero~\cite{silver2017}, we replace standard UCT with Prior-UCT:
+    \begin{equation}
+    \mathrm{PUCT}(s, a) = \frac{W(s,a)}{N(s,a)} + c \cdot P(s, a) \frac{\sqrt{N(s)}}{1 + N(s,a)},
+    \end{equation}
+    where $P(s, a) \propto \exp(-0.35\,\mathrm{rank}_{h_{\text{ord}}}(a))$ prioritizes tactically sharp captures and centralizing moves during early expansion.
+\end{enumerate}
+
+\subsection{Verified Xiangqi Tournament Results}
+Table~\ref{tab:xq_mcts} summarizes 50 alternating games per matchup on the symmetric Xiangqi skirmish position (80-ply draw horizon, 200 iterations for MCTS). Progressive injection of domain knowledge produces a monotonic leap in both strength and speed:
+\begin{itemize}
+    \item Against Random: MCTS-Random wins **66.0%** (`1727 ms/mv`) $\to$ MCTS-Heuristic wins **88.0%** (`1062 ms/mv`) $\to$ \textbf{MCTS-ValueCut} surges to **96.0% win rate** while running **8.4$\times$ faster** (`206 ms/mv`).
+    \item Against 1-ply Greedy: Alpha--Beta ($d=2$) draws half its games (**50.0%W / 50.0%D / 0%L**), whereas \textbf{PUCT + Value-Cutoff} dominates with **90.0%W / 10.0%D / 0.0%L** (`185.6 ms/mv`), proving that selective asymmetric lookahead combined with a smooth value estimator resolves tactical exchanges deeper than fixed-depth $d=2$ search.
+\end{itemize}
+
+\begin{table}[t]
+\centering
+\caption{Xiangqi 50-Game Alternating Tournament Results (200 MCTS Iters)}
+\label{tab:xq_mcts}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+\textbf{Matchup} & \textbf{W / D / L} & \textbf{Win\%} & \textbf{Score\%} & \textbf{ms/mv} \\
+\midrule
+Alpha--Beta ($d{=}2$) vs. Random & 44 / 6 / 0 & 88.0\% & 94.0\% & 47.1 \\
+MCTS-Random vs. Random & 33 / 17 / 0 & 66.0\% & 83.0\% & 1727.4 \\
+MCTS-Heuristic vs. Random & 44 / 6 / 0 & 88.0\% & 94.0\% & 1062.2 \\
+\textbf{MCTS-ValueCut vs. Random} & \textbf{48 / 0 / 2} & \textbf{96.0\%} & \textbf{96.0\%} & \textbf{206.1} \\
+\midrule
+Alpha--Beta ($d{=}2$) vs. Greedy & 25 / 25 / 0 & 50.0\% & 75.0\% & 39.3 \\
+\textbf{PUCT-ValueCut vs. Greedy} & \textbf{45 / 5 / 0} & \textbf{90.0\%} & \textbf{95.0\%} & \textbf{185.6} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ============================================================================
+\section{Comparative Synthesis \& Conclusion}
+% ============================================================================
+Applying both algorithms to Xiangqi highlights a crisp mathematical duality:
+\begin{itemize}
+    \item \textbf{Alpha--Beta + MVV--LVA} excels at ultra-fast tactical verification (`20--47 ms/mv`, 93.4\% pruning), guaranteeing zero horizon mistakes within depth $d$, but scales exponentially $O(b^{d/2})$ and suffers from the fixed-depth horizon effect against tactical Greedy opponents.
+    \item \textbf{MCTS--PUCT + Value-Cutoff} scales linearly with simulation budget $O(T \cdot L)$, avoids fixed-horizon blindness by asymmetrically deepening promising forcing lines, and achieves 90\%--96\% win rates---directly illustrating how combining UCT with prior policies $P(s,a)$ and leaf value estimators $\hat{v}(s)$ bridges classical search to modern AlphaZero engines~\cite{silver2017}.
+\end{itemize}
+
+\begin{thebibliography}{5}
+\bibitem{knuth1975}
+D.~E. Knuth and R.~W. Moore, ``An analysis of alpha-beta pruning,'' \emph{Artificial Intelligence}, vol.~6, no.~4, pp.~293--326, 1975.
+\bibitem{auer2002}
+P.~Auer, N.~Cesa-Bianchi, and P.~Fischer, ``Finite-time analysis of the multiarmed bandit problem,'' \emph{Machine Learning}, vol.~47, pp.~235--256, 2002.
+\bibitem{kocsis2006}
+L.~Kocsis and C.~Szepesv\'ari, ``Bandit based Monte-Carlo planning,'' in \emph{Proc. ECML}, Springer, 2006, pp.~282--293.
+\bibitem{silver2017}
+D.~Silver \emph{et al.}, ``Mastering the game of Go without human knowledge,'' \emph{Nature}, vol.~550, pp.~354--359, 2017.
+\end{thebibliography}
+
+\end{document}
